@@ -1,6 +1,10 @@
 -module(house).
 -export([draw_house/0]).
 
+% You have to type this into the shell first:
+% erlproc:go().
+% and wait for it to return to you. I'll fix that later.
+
 draw_house() ->
   erlproc:sketch(300, 300),
   erlproc:background([255, 192, 255]),
