@@ -66,7 +66,8 @@ public class ErlProc
       }
       else
       {
-        System.err.println("Unknown command " + command.atomValue());
+        System.err.println("Java: Unknown command " + command.atomValue()
+          + "\r");
       }
     }
     catch (Exception e)
@@ -98,7 +99,6 @@ public class ErlProc
       {
         try
         {
-          System.err.println(list.elementAt(i).getClass() + "\r");
           if (OtpErlangDouble.class.isInstance(list.elementAt(i)))
           {
             result[i] = ((OtpErlangDouble) list.elementAt(i)).floatValue();
@@ -127,14 +127,17 @@ public class ErlProc
     boolean exit = false;
     OtpMsg message;
     OtpErlangTuple tuple;
+    
     String command;
+    float[] coords;
     while (!exit)
     {
       try {
         message = mbox.receiveMsg();
         tuple = (OtpErlangTuple) message.getMsg();
         command = ((OtpErlangAtom) tuple.elementAt(0)).atomValue();
-        System.err.println("Command: " + command + "\r");
+        
+        System.err.println("Java gets command: " + command + "\r");
         if (command.equals("sketch"))
         {
           float[] dimensions = new float[2];
@@ -154,19 +157,74 @@ public class ErlProc
         else if (command.equals("redraw"))
         {
           embed.redraw();
+          embed.noLoop();
         }
         else if (command.equals("rect"))
         {
-          float[] coords = getFloatList(tuple.elementAt(1));
-          embed.rect(coords[0], coords[1], coords[2], coords[3]);
+          coords = getFloatList(tuple.elementAt(1));
+          if (coords.length >= 4)
+          {
+            embed.rect(coords[0], coords[1], coords[2], coords[3]);
+          }
+        }
+        else if (command.equals("ellipse"))
+        {
+          coords = getFloatList(tuple.elementAt(1));
+          embed.ellipse(coords[0], coords[1], coords[2], coords[3]);
         }
         else if (command.equals("fill"))
         {
           doFill(tuple.elementAt(1));
         }
+        else if (command.equals("noFill"))
+        {
+          embed.noFill();
+        }
+        else if (command.equals("background"))
+        {
+          doBackground(tuple.elementAt(1));
+        }
+        else if (command.equals("stroke"))
+        {
+          doStroke(tuple.elementAt(1));
+        }
+        else if (command.equals("nostroke"))
+        {
+          embed.noStroke();
+        }
+        else if (command.equals("line"))
+        {
+          coords = getFloatList(tuple.elementAt(1));
+          if (coords.length >= 4)
+          {
+            embed.line(coords[0], coords[1], coords[2], coords[3]);
+          }
+        }
+        else if (command.equals("triangle"))
+        {
+          coords = getFloatList(tuple.elementAt(1));
+          if (coords.length >= 6)
+          {
+            embed.triangle(coords[0], coords[1], coords[2], coords[3],
+              coords[4], coords[5]);
+          }
+        }
+        else if (command.equals("quad"))
+        {
+          coords = getFloatList(tuple.elementAt(1));
+          if (coords.length >= 8)
+          {
+            embed.quad(coords[0], coords[1], coords[2], coords[3],
+              coords[4], coords[5], coords[6], coords[7]);
+          }
+        }
         else if (command.equals("mouse"))
         {
           doMouse();
+        }
+        else if (command.equals("pmouse"))
+        {
+          doPMouse();
         }
       }
       catch (OtpErlangExit e)
@@ -193,7 +251,33 @@ public class ErlProc
       default: break;
     }
   }
-  
+
+  private void doBackground(OtpErlangObject params)
+  {
+    float[] values = getFloatList(params);
+    switch (values.length)
+    {
+      case 1: embed.background(values[0]); break;
+      case 2: embed.background(values[0], values[1]); break;
+      case 3: embed.background(values[0], values[1], values[2]); break;
+      case 4: embed.background(values[0], values[1], values[2], values[3]); break;
+      default: break;
+    }
+  }
+
+  private void doStroke(OtpErlangObject params)
+  {
+    float[] values = getFloatList(params);
+    switch (values.length)
+    {
+      case 1: embed.stroke(values[0]); break;
+      case 2: embed.stroke(values[0], values[1]); break;
+      case 3: embed.stroke(values[0], values[1], values[2]); break;
+      case 4: embed.stroke(values[0], values[1], values[2], values[3]); break;
+      default: break;
+    }
+  }
+
   private void doMouse()
   {
     OtpErlangObject[] coords = new OtpErlangObject[2];
@@ -266,12 +350,6 @@ class Embedded extends PApplet {
 
   public void draw() {
       // drawing code goes here
-  }
-
-  public void mousePressed() {
-    // do something based on mouse movement
-    // update the screen (run draw once)
-    redraw();
   }
 }
   
