@@ -61,6 +61,7 @@ public class ErlProc
       if (command.atomValue().equals("kabuki"))
       {
         erlPid = message.getSenderPid();
+        System.err.println("Java gets Erlang's Pid: " + erlPid + "\r");
         mbox.send(erlPid, new OtpErlangAtom("kabuki_complete"));
         processingLoop();
       }
@@ -352,4 +353,3 @@ class Embedded extends PApplet {
       // drawing code goes here
   }
 }
-  

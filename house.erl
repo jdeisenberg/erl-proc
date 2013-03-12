@@ -14,5 +14,7 @@ draw_house() ->
   erlproc:fill([255, 255, 0]),
   erlproc:no_stroke(),
   erlproc:ellipse([60, 60, 50, 50]),
-  erlproc:redraw().
+  erlproc:redraw(),
+  erlproc:noloop(),
+  ok.
   

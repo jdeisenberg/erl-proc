@@ -41,17 +41,23 @@ erlproc_init() ->
   % It's going to send me back its Pid and node name
   receive 
     {kabuki, ProcessingPid, ProcessingNodeName} ->
-      io:format("Got Java external pid ~p at ~p~n",
+      io:format("Erlang gets Java's pid: ~p at ~p~n",
         [ProcessingPid, ProcessingNodeName]),
       link(ProcessingPid), % link to it...
       
       % and send it a message by name (which has my pid attached)
-      {processing, ProcessingNodeName} ! {kabuki, message_has_my_pid},    
+      {processing, ProcessingNodeName} ! {kabuki, message_has_my_pid},  
       
+      % and wait for it to respond to me
+      receive
+        kabuki_complete ->
+        io:format("Erlang reports kabuki complete~n")
+      end,
+     
       erlproc_loop(ProcessingPid);
       
     _X ->
-      io:format("Received unexpected message ~p~n", [_X])
+      io:format("Erlang received unexpected message ~p~n", [_X])
   end.
 
 %% Process commands destined for Java at ProcessingPid.
@@ -87,9 +93,6 @@ erlproc_loop(ProcessingPid) ->
     {call, Command, Data} ->
       io:format("erlang: call ~p ~p~n", [Command, Data]),
       ProcessingPid ! {Command, Data},
-      erlproc_loop(ProcessingPid);
-    kabuki_complete ->
-      io:format("Handshaking with Java is complete~n"),
       erlproc_loop(ProcessingPid);
     {'EXIT', _, _} ->
       io:format("Java program exits. Ending erlang loop~n");
