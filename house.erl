@@ -1,12 +1,12 @@
 -module(house).
--export([draw_house/0]).
+-export([setup/0, draw/0]).
 
-% You have to type this into the shell first:
-% erlproc:go().
-% and wait for it to return to you. I'll fix that later.
+setup() ->
+  % io:format(standard_error, "Begin setup in module house~n", []),
+  erlproc:background([255, 255, 255]).
 
-draw_house() ->
-  erlproc:sketch(300, 300),
+draw() ->
+  % io:format(standard_error, "Begin draw in module house~n",[]),
   erlproc:background([255, 192, 255]),
   erlproc:rect([100, 100, 100, 100]),
   erlproc:fill([0, 128, 0]),
@@ -14,7 +14,7 @@ draw_house() ->
   erlproc:fill([255, 255, 0]),
   erlproc:no_stroke(),
   erlproc:ellipse([60, 60, 50, 50]),
-  erlproc:redraw(),
-  erlproc:noloop(),
+  erlproc:no_loop(),
+  % io:format(standard_error, "End house~n",[]),
   ok.
   
