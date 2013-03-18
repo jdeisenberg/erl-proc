@@ -1,0 +1,52 @@
+= How the Code Works
+
+There are three co-operating processes in this code.
+
+. The hub process (Erlang), which communicates with the other two processes.
+. The Java process. It gets a list of things to draw from the hub,
+and sends the drawing environment to the hub.
+. The sketch process (Erlang). It sends the hub things that it wants to draw,
+and awaits the hub's response. This is necessary to make sure
+that calls to the hub stay in order.
+
+== Initial Handshaking
+
+There is some initial handshaking kabuki, where the hub starts the Java
+process and the two processes exchange +pid+s.
+
+[width="50%",cols="<4,^1,<4",options="header",grid="none"]
+|======================
+|Erlang hub||Java
+|Open port to Java |->|Program starts
+|register port||
+|Send Node name to Java via port| ->|Get Erlang node name
+|Get Java's +pid+|<-|Establish connection to Erlang node and send my +pid+ to Erlang
+|Send Java my +pid+ and sketch dimensions|->|Receive +pid+ and dimensions
+|Receive completion message|<-|Send completion message
+|Start hub loop||Start +PApplet+
+|======================
+
+Once the handshaking is done, +PApplet+ is running, and it calls a Java
+function named +setup()+, then +draw()+ 60 times a second. Here is the
+communication between Java, the hub, and the sketch for the +draw()+ 
+function; +setup()+ works the same way.
+
+The "environment" referred to in the following table is the current
+state of the +PApplet+: mouse position, previous mouse position, mouse
+button (left/right/center), mouse pressed (true/false). The environment
+as of this version doesn't include keypresses.
+
+[width="50%",cols="<4,^1,<4,^1,<4",options="header",grid="none"]
+|======================
+|Java||Hub||Sketch
+|Send environment|->|Receive environment||
+|Receive +ok+|<-|Send +ok+||
+|Send +draw+ and wait|->|Set drawing list to +[]+ and spawn +draw/0+|->|+draw/0+ starts
+|||Add command to list|<-|Send a drawing command, then wait
+|||Send +ok+ to sketch|->|Receive +ok+
+|||Add command to list|<-|Send another drawing command, and wait
+|||Send +ok+ to sketch|->|Receive +ok+
+|||Receive +`EXIT'+|<-|+draw/0+ ends
+|Execute command list|<-|Send list to Java||
+|======================
+

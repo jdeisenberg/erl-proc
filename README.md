@@ -5,23 +5,30 @@ Drive Processing's core.jar from Erlang
 
 To make this work, you have to be running `erl` with a node name:
 
-    erl -sname example
+    erl -sname some_node_name
 
-Before you run a demo, you have to establish communication with a Java program that
-has Processing's `core.jar`:
+You write your graphics code in a module that contains `setup/0` and
+`draw/0` functions. Here is a short example:
 
-    > erlproc:go().
+    -module(example).
+    -export([setup/0, draw/0]).
+    
+    setup() ->
+      background([255]).
+    
+    draw() ->
+      rect([100, 100, 50, 50]),
+      fill([255, 0, 0]),
+      ellipse([125, 125, 30, 40]),
+      no_loop().  % this prevents redrawing 60 times per second
 
-Then you can issue commands to Processing from `erl` , like:
+To start the sketch, call the `erlproc:sketch/2` with the module name
+and the sketch size:
 
-    erlproc:sketch([300, 300]).
-    [Mx, My] = erlproc:mouse().
-    erlproc:fill([255, 0, 0]).
-    erlproc:rect([Mx, My, 30, 30]).
-    erlproc:redraw().
+    erlproc:sketch(example, [300, 300]).
 
-That last command is necessary to display what you've drawn.
+There are two example modules with this code. The first one draws a
+simple house and sun; the second draws a circle that follows the mouse.
 
-At the moment, if you do the preceding commands from a module, the redraw will
-show the circle, and then immediately erase the window. I'm working on that.
-
+    erlproc:sketch(house, [300, 300]).
+    erlproc:sketch(mouse_movement, [200, 200]).
