@@ -1,9 +1,10 @@
 erl-proc
 ========
 
-Drive Processing's core.jar from Erlang
+Create graphics from Erlang by calling Processing's `core.jar`
+([Processing](http://processing.org/) "is an open source programming language and environment...to create images...and to teach fundamentals of computer programming within a visual context.")
 
-To make this work, you have to be running `erl` with a node name:
+To use the `erlproc` module, you have to be running `erl` with a node name:
 
     erl -sname some_node_name
 
@@ -27,7 +28,7 @@ and the sketch size:
 
     erlproc:sketch(example, [300, 300]).
 
-There are two example modules with this code. The first one draws a
+There are two sample modules with this code. The first one draws a
 simple house and sun; the second draws a circle that follows the mouse.
 
     erlproc:sketch(house, [300, 300]).
