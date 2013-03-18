@@ -18,16 +18,24 @@
   hub/2, hub_loop/5,
   redraw/0,
   no_loop/0,
+  point/1,
   line/1,
   rect/1,
   ellipse/1,
   triangle/1,
   quad/1,
+  arc/1,
   fill/1, no_fill/0,
   stroke/1, no_stroke/0,
+  stroke_weight/1,
   background/1,
+  smooth/0,
   mouse/0,
-  pmouse/0
+  pmouse/0,
+  mouse_pressed/0,
+  mouse_button/0,
+  rect_mode/1,
+  ellipse_mode/1
 ]).
 
 
@@ -143,9 +151,19 @@ hub_loop(SketchModule, SketchPid, JavaPid, Environment, DrawList) ->
       SketchPid ! [X, Y],
       hub_loop(SketchModule, SketchPid, JavaPid, Environment, DrawList);
 
+    {draw_request, mouse_pressed} ->
+      {_K, Status} = lists:keyfind(mousePressed, 1, Environment),
+      SketchPid ! Status,
+      hub_loop(SketchModule, SketchPid, JavaPid, Environment, DrawList);
+
+    {draw_request, mouse_button} ->
+      {_K, Button} = lists:keyfind(mouseButton, 1, Environment),
+      SketchPid ! Button,
+      hub_loop(SketchModule, SketchPid, JavaPid, Environment, DrawList);
+
     {'EXIT', SketchPid, normal} ->
       % io:format(standard_error, "Sketch function ~p exits normally.~n",
-      %  [SketchPid]),
+      % [SketchPid]),
       JavaPid ! {execute_commands, DrawList},
       hub_loop(SketchModule, undefined, JavaPid, Environment, []);
     
@@ -175,12 +193,20 @@ no_loop() ->
   hub ! {draw_cmd, noLoop},
   await().
 
+point(Coords) when is_list(Coords) ->
+  hub ! {draw_cmd, point, Coords},
+  await().
+
 line(Coords) when is_list(Coords) ->
   hub ! {draw_cmd, line, Coords},
   await().
 
 rect(Coords) when is_list(Coords) ->
   hub ! {draw_cmd, rect, Coords},
+  await().
+
+rect_mode(Mode) when is_atom(Mode) ->
+  hub ! {draw_cmd, rect_mode, Mode},
   await().
 
 triangle(Coords) when is_list(Coords) ->
@@ -191,12 +217,24 @@ quad(Coords) when is_list(Coords) ->
   hub ! {draw_cmd, quad, Coords},
   await().
 
+arc(Coords) when is_list(Coords) ->
+  hub ! {draw_cmd, arc, Coords},
+  await().
+
 ellipse(Coords) when is_list(Coords) -> 
   hub ! {draw_cmd, ellipse, Coords},
   await().
   
+ellipse_mode(Mode) when is_atom(Mode) ->
+  hub ! {draw_cmd, ellipse_mode, Mode},
+  await().
+
 background(ColorList) when is_list(ColorList) ->
   hub ! {draw_cmd, background, ColorList},
+  await().
+
+smooth() ->
+  hub ! {draw_cmd, smooth},
   await().
 
 fill(ColorList) when is_list(ColorList) ->
@@ -214,7 +252,11 @@ stroke(ColorList) when is_list(ColorList) ->
 no_stroke() ->
   hub ! {draw_cmd, noStroke},
   await().
- 
+
+stroke_weight(W) ->
+  hub ! {draw_cmd, strokeWeight, [W]},
+  await().
+
 mouse() ->
   hub ! {draw_request, mouse},
   receive
@@ -227,5 +269,17 @@ pmouse() ->
   receive
     [X, Y] -> [X, Y];
     _Other -> [0.0, 0.0]
+  end.
+
+mouse_pressed() ->
+  hub ! {draw_request, mouse_pressed},
+  receive
+    Status -> Status
+  end.
+
+mouse_button() ->
+  hub ! {draw_request, mouse_button},
+  receive
+    Button -> Button
   end.
 
