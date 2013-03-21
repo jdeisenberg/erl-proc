@@ -1,0 +1,108 @@
+= Functions implemented in +erl-proc+
+
+The functions that are implemented try as best as possible to mimic the
+function calls in Processing. Whenever possible, I pass a list of values to
+the Erlang functions.
+
+== Color Lists
+
+For all functions that require a color specification, you may pass a list
+consisting of one to four values:
+
++[Gray]+::
+  Value from 0-255; 0  is black, 255 is white.
+
++[Gray, Alpha]+::
+  +Gray+ goes from 0 (black) to 255 (white); +Alpha+ goes from 0 (transparent) to 255 (opaque).
+
++[Red, Green, Blue]+::
+  Each value goes from 0 to 255, 0 representing "none" and 255 as "maximum amount possible."
+
++[Red, Green, Blue, Alpha]++::
+  The first three values are as described in the preceding entry; +Alpha+ goes from 0 (transparent) to 255 (opaque).
+  
+== Functions using Color Lists
+
++background(_ColorList_)+::
+  Clears the sketch to the given color.
+
++fill(_ColorList_)+::
+  Specifies color to use for filling a shape.
+  
++no_fill()+::
+  Shapes are drawn with no fill color.
+  
++stroke(_ColorList_)+::
+  Specifies the color for the outline of a shape or a line.
+
++stroke_weight(W)+::
+  Specifies the stroke width in pixels. The argument is a float, not a list.
+
++no_stroke()+::
+  No outline is drawn on shapes.
+
++smooth()+::
+  Uses antialiasing to draw smoother lines; makes rendering time slightly
+slower.
+
+== Points, Lines, and Shapes
+
++point([X1, Y1])+::
+  Draws a point at coordinate (X1, Y1).
+
++line([X1, Y1, X2, Y2])+::
+  Draws a line from point (X1, Y1) to (X2, Y2).
+
++rect([X, Y, W, H])+::
+  If rectangle mode is +corner+ (the default), draws a rectangle whose upper
+left corner is (X, Y) with width W and height H.
+
++rect_mode(Mode)+::
+  Sets the interpretation for the coordinates of the +rect/1+ function
+* +corner+: coordinates are (TopleftX, TopleftY, Width, Height)
+* +corners+: coordinates are (TopleftX, TopleftY, BottomrightX, BottomrightY)
+* +center+: coordinates are (CenterX, CenterY, Width, Height)
+* +radius+: coordinates are (CenterX, CenterY, HalfWidth, HalfHeight)
+
++ellipse([X, Y, W, H])+::
+  If ellipse mode is +center+ (the default), draws an ellipse centered at
+(X,Y) with width W and height H.
+
++ellipse_mode(Mode)+::
+  Sets the interpretation for the coordinates of the +ellipse/1+ function
+* +corner+: coordinates are (TopleftX, TopleftY, Width, Height)
+* +corners+: coordinates are (TopleftX, TopleftY, BottomrightX, BottomrightY)
+* +center+: coordinates are (CenterX, CenterY, Width, Height)
+* +radius+: coordinates are (CenterX, CenterY, HalfWidth, HalfHeight)
+
++triangle([X1, Y1, X2, Y2, X3, Y3])+::
+  Draws a triangle whose vertices are at the given coordinates.
+
++quad([X1, Y1, X2, Y2, X3, Y3, X4, Y4])+::
+  Draws an arbitrary four-sided figure whose vertices are at the given coordinates.
+
++arc([X, Y, W, H, Start, Stop])+::
++arc([X, Y, W, H, Start, Stop, Mode])+::
+  Draws a portion of the ellipse with center (X, Y) and the given Width
+and Height for the bounding box. The portion drawn begins at angle +Start+
+and ends at angle +Stop+, both measured in radians. The optional +Mode+
+may be the atom +open+, +chord+, or +pie+. Angles are measured clockwise from
+0.
+
+== Retrieving Environment Information
+
++mouse()+::
+  Returns the current mouse coordinates as a list of floats +[X, Y]+
+
++pmouse()+::
+  Returns the previous mouse coordinates as a list of floats +[X, Y]+
+
++mouse_pressed()+::
+  Returns +true+ or +false+ depending on whether a mouse button is pressed
+or not.
+
++mouse_button()+::
+  Returns atom +left+, +right+, or +center+, depending upon which mouse button
+is pressed.
+
+

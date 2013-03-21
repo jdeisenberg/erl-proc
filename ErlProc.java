@@ -183,7 +183,8 @@ public class ErlProc
         {
           if (OtpErlangDouble.class.isInstance(list.elementAt(i)))
           {
-            result[i] = ((OtpErlangDouble) list.elementAt(i)).floatValue();
+            double d = ((OtpErlangDouble) list.elementAt(i)).doubleValue();
+            result[i] = (float) d;
           }
           else if (OtpErlangLong.class.isInstance(list.elementAt(i)))
           {
@@ -244,6 +245,14 @@ public class ErlProc
       {
         doStroke(tuple.elementAt(1));
       }
+      else if (command.equals("strokeWeight"))
+      {
+        coords = getFloatList(tuple.elementAt(1), 1);
+        if (coords.length == 1)
+        {
+          embed.strokeWeight((float) coords[0]);
+        }
+      }
       else if (command.equals("nostroke"))
       {
         embed.noStroke();
@@ -251,6 +260,18 @@ public class ErlProc
       else if (command.equals("background"))
       {
         doBackground(tuple.elementAt(1));
+      }
+      else if (command.equals("smooth"))
+      {
+        embed.smooth();
+      }
+      else if (command.equals("point"))
+      {
+        coords = getFloatList(tuple.elementAt(1), 2);
+        if (coords.length == 2)
+        {
+          embed.point(coords[0], coords[1]);
+        }
       }
       else if (command.equals("line"))
       {
@@ -268,6 +289,11 @@ public class ErlProc
           embed.rect(coords[0], coords[1], coords[2], coords[3]);
         }
       }
+      else if (command.equals("rect_mode"))
+      {
+        int mode = getMode((OtpErlangAtom) tuple.elementAt(1));
+        embed.rectMode(mode);
+      }
       else if (command.equals("ellipse"))
       {
         coords = getFloatList(tuple.elementAt(1), 4);
@@ -275,6 +301,11 @@ public class ErlProc
         {
           embed.ellipse(coords[0], coords[1], coords[2], coords[3]);
         }
+      }
+      else if (command.equals("ellipse_mode"))
+      {
+        int mode = getMode((OtpErlangAtom) tuple.elementAt(1));
+        embed.ellipseMode(mode);
       }
       else if (command.equals("triangle"))
       {
@@ -294,6 +325,39 @@ public class ErlProc
             coords[4], coords[5], coords[6], coords[7]);
         }
       }
+      else if (command.equals("arc"))
+      {
+        doArc(tuple.elementAt(1));
+      }
+    }
+  }
+
+  private void doArc(OtpErlangObject params)
+  {
+    OtpErlangList list = ((OtpErlangList) params);
+    int mode = PApplet.OPEN;
+    
+    float [] coords = getFloatList(list, 6);
+    if (coords.length == 6)
+    {
+      if (list.arity() == 7)
+      {
+        String modeAtom = ((OtpErlangAtom) list.elementAt(6)).atomValue();
+        if (modeAtom.equals("open"))
+        {
+          mode = PApplet.OPEN;
+        }
+        else if (modeAtom.equals("chord"))
+        {
+          mode = PApplet.CHORD;
+        }
+        else if (modeAtom.equals("pie"))
+        {
+          mode = PApplet.PIE;
+        }
+      }
+      embed.arc(coords[0], coords[1], coords[2], coords[3],
+        coords[4], coords[5], mode);
     }
   }
 
@@ -336,6 +400,33 @@ public class ErlProc
     }
   }
 
+  /**
+   * Given an atom, retrieve mode for rectangle or ellipse
+   */
+  private int getMode(OtpErlangAtom atom)
+  {
+    String str = atom.atomValue();
+    int result = 0;
+    
+    if (str.equals("corner"))
+    {
+      result = PApplet.CORNER;
+    }
+    else if (str.equals("corners"))
+    {
+      result = PApplet.CORNERS;
+    }
+    else if (str.equals("center"))
+    {
+      result = PApplet.CENTER;
+    }
+    else if (str.equals("radius"))
+    {
+      result = PApplet.RADIUS;
+    }
+    return result;
+  }
+  
   class Embedded extends PApplet {
     OtpErlangObject obj;
     OtpErlangList drawingList;
