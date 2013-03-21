@@ -15,13 +15,13 @@ You write your graphics code in a module that contains `setup/0` and
     -export([setup/0, draw/0]).
     
     setup() ->
-      background([255]).
+      erlproc:background([255]).
     
     draw() ->
-      rect([100, 100, 50, 50]),
-      fill([255, 0, 0]),
-      ellipse([125, 125, 30, 40]),
-      no_loop().  % this prevents redrawing 60 times per second
+      erlproc:rect([100, 100, 50, 50]),
+      erlproc:fill([255, 0, 0]),
+      erlproc:ellipse([125, 125, 30, 40]),
+      erlproc:no_loop().  % this prevents redrawing 60 times per second
 
 To start the sketch, call the `erlproc:sketch/2` with the module name
 and the sketch size:
